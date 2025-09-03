@@ -17,7 +17,6 @@ app.use(cors());
 connectDB();
 
 app.use("/", router);
-app.use("/admin", adminRouter);
 
 app.get("/", (req, res) => {
   res.send("First page");
