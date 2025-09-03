@@ -4,7 +4,6 @@ const express = require("express");
 const app = express();
 const connectDB = require("./db/db_connection");
 const router = require("./routes/user_routes");
-const adminRouter = require("./routes/admin_routes");
 
 const cors = require("cors");
 
