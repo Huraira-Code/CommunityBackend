@@ -161,6 +161,39 @@ const createTeamLead = async (req, res) => {
 };
 
 
+const getAllCommunities = async (req, res) => {
+  try {
+    const communities = await Community.find().populate('supervisor', 'name email role');
+    res.status(200).json({ communities });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// GET /api/communities/:communityId/tenures
+const getTenuresByCommunity = async (req, res) => {
+  try {
+    const { communityId } = req.params;
+
+    if (!communityId) {
+      return res.status(400).json({ message: 'Community ID is required' });
+    }
+
+    const tenures = await Tenure.find({ community: communityId }).populate('community', 'name');
+
+    if (!tenures || tenures.length === 0) {
+      return res.status(404).json({ message: 'No tenures found for this community' });
+    }
+
+    res.status(200).json({ tenures });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
 
 const createMember = async (req, res) => {
   try {
@@ -191,4 +224,4 @@ const createMember = async (req, res) => {
 
 
 
-module.exports = { login ,createCommunity,createTeamLead,createMember , createPresident };
+module.exports = { login ,createCommunity,createTeamLead,createMember , createPresident , createTenure , getAllCommunities,getTenuresByCommunity };
