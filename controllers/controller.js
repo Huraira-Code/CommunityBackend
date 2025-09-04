@@ -61,10 +61,10 @@ const createCommunity = async (req, res) => {
     });
     await supervisor.save();
 
-    // Create Community with supervisor
+    // Create Community with supervisorId
     const community = new Community({
       name: communityName,
-      supervisor: supervisor._id
+      supervisorId: supervisor._id
     });
     await community.save();
 
