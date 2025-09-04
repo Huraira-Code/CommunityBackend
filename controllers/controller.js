@@ -163,7 +163,7 @@ const createTeamLead = async (req, res) => {
 
 const getAllCommunities = async (req, res) => {
   try {
-    const communities = await Community.find().populate('supervisor', 'name email role');
+    const communities = await Community.find().populate('supervisorId', 'name email role');
     res.status(200).json({ communities });
   } catch (err) {
     console.error(err);
