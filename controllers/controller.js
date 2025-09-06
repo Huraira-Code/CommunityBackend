@@ -163,7 +163,8 @@ const createTeamLead = async (req, res) => {
 
 const getUserData = async (req, res) => {
   try {
-    console.log("abc")
+    console.log("abc");
+    
     // Get token from headers
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -171,7 +172,7 @@ const getUserData = async (req, res) => {
     }
 
     const token = authHeader.split(' ')[1];
-    console.log(token)
+    console.log(token);
 
     // Verify token
     let decoded;
@@ -181,17 +182,21 @@ const getUserData = async (req, res) => {
       return res.status(401).json({ message: 'Invalid or expired token' });
     }
 
-    console.log(decoded)
+    console.log(decoded);
 
     // Find user by decoded ID
     const user = await User.findById(decoded.userId)
-      .populate('communityId', 'name') // optional: populate community name
-      .populate('tenureId', 'name');   // optional: populate tenure name
+      .populate('tenureId', 'name'); // still populate tenure if exists
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    console.log(user)
+
+    console.log(user);
+
+    // Find community where this user is the supervisor
+    const community = await Community.findOne({ supervisorId: user._id }).select('name _id');
+    console.log(community);
 
     // Send user data
     res.status(200).json({
@@ -199,7 +204,7 @@ const getUserData = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
-      communityId: user.communityId,
+      community: community || null, // null if no community found
       tenureId: user.tenureId,
       teamLeadId: user.teamLeadId || null,
     });
