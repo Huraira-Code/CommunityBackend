@@ -163,6 +163,7 @@ const createTeamLead = async (req, res) => {
 
 const getUserData = async (req, res) => {
   try {
+    console.log("abc")
     // Get token from headers
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
