@@ -161,6 +161,52 @@ const createTeamLead = async (req, res) => {
 };
 
 
+const getUserData = async (req, res) => {
+  try {
+    // Get token from headers
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'Authorization token missing or invalid' });
+    }
+
+    const token = authHeader.split(' ')[1];
+
+    // Verify token
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      return res.status(401).json({ message: 'Invalid or expired token' });
+    }
+
+    // Find user by decoded ID
+    const user = await User.findById(decoded.userId)
+      .populate('communityId', 'name') // optional: populate community name
+      .populate('tenureId', 'name');   // optional: populate tenure name
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Send user data
+    res.status(200).json({
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      communityId: user.communityId,
+      tenureId: user.tenureId,
+      teamLeadId: user.teamLeadId || null,
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
+
 const getAllCommunities = async (req, res) => {
   try {
     const communities = await Community.find().populate('supervisorId', 'name email role password');
@@ -224,4 +270,4 @@ const createMember = async (req, res) => {
 
 
 
-module.exports = { login ,createCommunity,createTeamLead,createMember , createPresident , createTenure , getAllCommunities,getTenuresByCommunity };
+module.exports = { login ,createCommunity,createTeamLead,createMember , createPresident , createTenure , getAllCommunities,getTenuresByCommunity ,getUserData};

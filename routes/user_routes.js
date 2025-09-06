@@ -8,7 +8,8 @@ const {
   createPresident,
   createTenure,
   getAllCommunities,
-  getTenuresByCommunity
+  getTenuresByCommunity,
+  getUserData
 } = require("../controllers/controller");
 
 router.post("/login", login);
@@ -19,6 +20,8 @@ router.post("/createPresident", createPresident);
 router.post("/createTenure", createTenure);
 router.get("/getAllCommunities", getAllCommunities);
 router.post("/createTenure", createTenure);
+router.post("/getUserData", getUserData);
+
 router.get("/communities/:communityId/tenures", getTenuresByCommunity);
 
 
