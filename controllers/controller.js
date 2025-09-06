@@ -20,7 +20,7 @@ const login = async (req, res) => {
     // Create JWT token
     const token = jwt.sign(
       { userId: user._id, role: user.role, communityId: user.communityId, tenureId: user.tenureId },
-      process.env.JWT_SECRET,
+
       { expiresIn: '7d' }
     );
 
@@ -170,6 +170,7 @@ const getUserData = async (req, res) => {
     }
 
     const token = authHeader.split(' ')[1];
+    console.log(token)
 
     // Verify token
     let decoded;
@@ -179,6 +180,8 @@ const getUserData = async (req, res) => {
       return res.status(401).json({ message: 'Invalid or expired token' });
     }
 
+    console.log(decoded)
+
     // Find user by decoded ID
     const user = await User.findById(decoded.userId)
       .populate('communityId', 'name') // optional: populate community name
@@ -187,6 +190,7 @@ const getUserData = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+    console.log(user)
 
     // Send user data
     res.status(200).json({
