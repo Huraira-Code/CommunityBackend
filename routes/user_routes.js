@@ -9,20 +9,70 @@ const {
   createTenure,
   getAllCommunities,
   getTenuresByCommunity,
-  getUserData
+  getUserData,
 } = require("../controllers/controller");
 
+const authenticationMiddleware = require("../middleware/auth");
+
+// Public route
 router.post("/login", login);
-router.post("/createCommunity", createCommunity);
-router.post("/createTeamLead", createTeamLead);
-router.post("/createMember", createMember);
-router.post("/createPresident", createPresident);
-router.post("/createTenure", createTenure);
-router.get("/getAllCommunities", getAllCommunities);
-router.post("/createTenure", createTenure);
-router.post("/getUserData", getUserData);
 
-router.get("/communities/:communityId/tenures", getTenuresByCommunity);
+// Protected + Role-based routes
+router.post(
+  "/createCommunity",
+  authenticationMiddleware("admin"),
+  createCommunity
+);
 
+router.post(
+  "/createPresident",
+  authenticationMiddleware("supervisor"),
+  createPresident
+);
+
+router.post(
+  "/createTeamLead",
+  authenticationMiddleware("president"),
+  createTeamLead
+);
+
+router.post(
+  "/createMember",
+  authenticationMiddleware("teamLead"),
+  createMember
+);
+
+router.post(
+  "/createTenure",
+  authenticationMiddleware("supervisor"),
+  createTenure
+);
+
+// Anyone authenticated can view communities
+router.get(
+  "/getAllCommunities",
+  authenticationMiddleware("admin"),
+  getAllCommunities
+);
+
+// Get user data (any authenticated role)
+router.post(
+  "/getUserData",
+  authenticationMiddleware(
+    "admin",
+    "president",
+    "supervisor",
+    "teamLead",
+    "member"
+  ),
+  getUserData
+);
+
+// Tenures by community (any authenticated role)
+router.get(
+  "/communities/:communityId/tenures",
+  authenticationMiddleware("supervisor"),
+  getTenuresByCommunity
+);
 
 module.exports = router;

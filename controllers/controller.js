@@ -1,7 +1,7 @@
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const Community = require("../models/Community");
-
+const Tenure = require("../models/Tenure");
 // POST /api/auth/login
 const login = async (req, res) => {
   try {
@@ -28,7 +28,6 @@ const login = async (req, res) => {
         tenureId: user.tenureId,
       },
       process.env.JWT_SECRET, // ✅ secret must be provided
-
       { expiresIn: "7d" }
     );
 
