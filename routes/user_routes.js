@@ -12,7 +12,7 @@ const {
   getUserData,
 } = require("../controllers/controller");
 
-const authenticationMiddleware = require("../middleware/auth");
+const authenticationMiddleware = require("../middleware/authentication");
 
 // Public route
 router.post("/login", login);
