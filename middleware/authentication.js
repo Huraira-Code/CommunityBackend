@@ -1,11 +1,7 @@
 const jwt = require("jsonwebtoken");
 
-/**
- * Authentication + Role Authorization Middleware
- * @param {...string} allowedRoles - Roles allowed to access the route
- */
 const authenticationMiddleware = (...allowedRoles) => {
-  return (req, res, next) => {
+  return async (req, res) => {
     const authHeader = req.headers.authorization;
 
     try {
@@ -14,6 +10,12 @@ const authenticationMiddleware = (...allowedRoles) => {
       }
 
       const token = authHeader.split(" ")[1];
+
+      if (!process.env.JWT_SECRET) {
+        console.error("JWT_SECRET is not defined!");
+        return res.status(500).json({ msg: "Server configuration error" });
+      }
+
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
       if (!decoded || !decoded.role) {
@@ -26,10 +28,10 @@ const authenticationMiddleware = (...allowedRoles) => {
 
       // attach user info to request for downstream use
       req.user = decoded;
-      next();
+      return req.user; // return user info instead of next()
     } catch (error) {
       console.error("Auth error:", error.message);
-      res.status(401).json({ msg: "Authentication failed" });
+      return res.status(401).json({ msg: "Authentication failed" });
     }
   };
 };
