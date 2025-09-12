@@ -58,13 +58,7 @@ router.get(
 // Get user data (any authenticated role)
 router.post(
   "/getUserData",
-  authenticationMiddleware(
-    "admin",
-    "president",
-    "supervisor",
-    "teamLead",
-    "member"
-  ),
+
   getUserData
 );
 
