@@ -18,42 +18,18 @@ const authenticationMiddleware = require("../middleware/authentication");
 router.post("/login", login);
 
 // Protected + Role-based routes
-router.post(
-  "/createCommunity",
-  authenticationMiddleware("admin"),
-  createCommunity
-);
+router.post("/createCommunity", createCommunity);
 
-router.post(
-  "/createPresident",
-  authenticationMiddleware("supervisor"),
-  createPresident
-);
+router.post("/createPresident", createPresident);
 
-router.post(
-  "/createTeamLead",
-  authenticationMiddleware("president"),
-  createTeamLead
-);
+router.post("/createTeamLead", createTeamLead);
 
-router.post(
-  "/createMember",
-  authenticationMiddleware("teamLead"),
-  createMember
-);
+router.post("/createMember", createMember);
 
-router.post(
-  "/createTenure",
-  authenticationMiddleware("supervisor"),
-  createTenure
-);
+router.post("/createTenure", createTenure);
 
 // Anyone authenticated can view communities
-router.get(
-  "/getAllCommunities",
-  authenticationMiddleware("admin"),
-  getAllCommunities
-);
+router.get("/getAllCommunities", getAllCommunities);
 
 // Get user data (any authenticated role)
 router.post(
@@ -63,10 +39,6 @@ router.post(
 );
 
 // Tenures by community (any authenticated role)
-router.get(
-  "/communities/:communityId/tenures",
-  authenticationMiddleware("supervisor"),
-  getTenuresByCommunity
-);
+router.get("/communities/:communityId/tenures", getTenuresByCommunity);
 
 module.exports = router;
