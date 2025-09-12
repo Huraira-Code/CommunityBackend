@@ -102,7 +102,7 @@ const createTenure = async (req, res) => {
 
     const tenure = new Tenure({
       name: tenureName,
-      community: communityId,
+      communityId: communityId,
     });
     await tenure.save();
 
