@@ -251,8 +251,7 @@ const getTenuresByCommunity = async (req, res) => {
       return res.status(400).json({ message: "Community ID is required" });
     }
 
-    const tenures = await Tenure.find({ community: communityId }).populate(
-      "community",
+    const tenures = await Tenure.find({ communityId: communityId }).populate(
       "name"
     );
 
