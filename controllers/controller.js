@@ -112,7 +112,6 @@ const createTenure = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
 const createPresident = async (req, res) => {
   try {
     const { name, email, password, tenureId } = req.body;
@@ -132,14 +131,18 @@ const createPresident = async (req, res) => {
     const president = new User({
       name,
       email,
-      password, // since you're not using bcrypt
+      password, // ✅ no bcrypt used currently
       role: "president",
       tenureId,
     });
 
     await president.save();
 
-    res.status(201).json({ message: "President created", president });
+    // Update Tenure with presidentId
+    tenure.presidentId = president._id;
+    await tenure.save();
+
+    res.status(201).json({ message: "President created", president, tenure });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
