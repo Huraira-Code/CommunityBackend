@@ -325,4 +325,5 @@ module.exports = {
   getAllCommunities,
   getTenuresByCommunity,
   getUserData,
+  getTenureByID
 };

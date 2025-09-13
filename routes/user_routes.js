@@ -10,6 +10,7 @@ const {
   getAllCommunities,
   getTenuresByCommunity,
   getUserData,
+  getTenureByID,
 } = require("../controllers/controller");
 
 const authenticationMiddleware = require("../middleware/authentication");
@@ -40,5 +41,6 @@ router.post(
 
 // Tenures by community (any authenticated role)
 router.get("/communities/:communityId/tenures", getTenuresByCommunity);
+router.get("/communities/:tenureId/tenuresById", getTenureByID);
 
 module.exports = router;
