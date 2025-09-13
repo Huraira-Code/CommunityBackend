@@ -11,6 +11,8 @@ const {
   getTenuresByCommunity,
   getUserData,
   getTenureByID,
+  createEvent,
+  getEventsByTenure,
 } = require("../controllers/controller");
 
 const authenticationMiddleware = require("../middleware/authentication");
@@ -39,8 +41,12 @@ router.post(
   getUserData
 );
 
+
 // Tenures by community (any authenticated role)
 router.get("/communities/:communityId/tenures", getTenuresByCommunity);
 router.get("/communities/:tenureId/tenuresById", getTenureByID);
 
+router.post("/createEvent", createEvent);
+// Get events by tenure ID
+router.get("/tenures/:tenureId/events", getEventsByTenure);
 module.exports = router;

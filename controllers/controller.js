@@ -2,6 +2,8 @@ const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const Community = require("../models/Community");
 const Tenure = require("../models/Tenure");
+const Event = require("../models/Event");
+
 // POST /api/auth/login
 const login = async (req, res) => {
   try {
@@ -318,6 +320,50 @@ const getTenureByID = async (req, res) => {
 };
 
 
+const Event = require('../models/event'); // assuming your Event model is in models/event.js
+
+// Create a new event
+const createEvent = async (req, res) => {
+  try {
+    const { tenureId, name, description, date, createdBy } = req.body;
+
+    if (!tenureId || !name || !date) {
+      return res.status(400).json({ error: 'tenureId, name, and date are required.' });
+    }
+
+    const event = new Event({
+      tenureId,
+      name,
+      description,
+      date,
+      createdBy
+    });
+
+    await event.save();
+
+    res.status(201).json({ message: 'Event created successfully.', event });
+  } catch (err) {
+    console.error('Error creating event:', err);
+    res.status(500).json({ error: 'Internal server error.' });
+  }
+};
+
+// Get all events for a given tenureId
+const getEventsByTenure = async (req, res) => {
+  try {
+    const { tenureId } = req.params;
+
+    const events = await Event.find({ tenureId }).sort({ date: 1 }); // Sort by event date ascending
+
+    res.status(200).json({ events });
+  } catch (err) {
+    console.error('Error fetching events:', err);
+    res.status(500).json({ error: 'Internal server error.' });
+  }
+};
+
+
+
 module.exports = {
   login,
   createCommunity,
@@ -328,5 +374,7 @@ module.exports = {
   getAllCommunities,
   getTenuresByCommunity,
   getUserData,
-  getTenureByID
+  getTenureByID,
+  createEvent,
+  getEventsByTenure
 };
