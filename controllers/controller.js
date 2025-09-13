@@ -320,7 +320,6 @@ const getTenureByID = async (req, res) => {
 };
 
 
-const Event = require('../models/event'); // assuming your Event model is in models/event.js
 
 // Create a new event
 const createEvent = async (req, res) => {
