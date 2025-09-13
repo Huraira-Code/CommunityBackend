@@ -293,6 +293,28 @@ const createMember = async (req, res) => {
   }
 };
 
+const getTenureByID = async (req, res) => {
+  try {
+    const { tenureId } = req.params;
+
+    if (!tenureId) {
+      return res.status(400).json({ message: "Tenure ID is required" });
+    }
+
+    const tenure = await Tenure.findById(tenureId);
+
+    if (!tenure) {
+      return res.status(404).json({ message: "Tenure not found" });
+    }
+
+    res.status(200).json({ tenure });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
 module.exports = {
   login,
   createCommunity,
