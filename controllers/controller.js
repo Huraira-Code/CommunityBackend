@@ -203,7 +203,6 @@ const getUserData = async (req, res) => {
     const user = await User.findById(decoded.userId).populate(
       "tenureId",
       "communityId",
-      "name",
     ); // still populate tenure if exists
 
     if (!user) {
