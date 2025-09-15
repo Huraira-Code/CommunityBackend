@@ -202,7 +202,7 @@ const getUserData = async (req, res) => {
     // Find user by decoded ID
     const user = await User.findById(decoded.userId).populate(
       "tenureId",
-      "communityId",
+      "name",
     ); // still populate tenure if exists
 
     if (!user) {
@@ -223,7 +223,7 @@ const getUserData = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
-      communityId : user.communityId,
+      // communityId : user.communityId,
       community: community || null, // null if no community found
       tenureId: user.tenureId,
       teamLeadId: user.teamLeadId || null,
