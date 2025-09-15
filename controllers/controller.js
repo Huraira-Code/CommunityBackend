@@ -134,7 +134,7 @@ const createPresident = async (req, res) => {
       password, // ✅ no bcrypt used currently
       role: "president",
       tenureId,
-      communityId
+      communityId,
     });
 
     await president.save();
@@ -200,10 +200,9 @@ const getUserData = async (req, res) => {
     console.log(decoded);
 
     // Find user by decoded ID
-    const user = await User.findById(decoded.userId).populate(
-      "tenureId",
-      "name",
-    ); // still populate tenure if exists
+    const user = await User.findById(decoded.userId)
+      .populate("tenureId")
+      .populate("communityId");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -223,7 +222,7 @@ const getUserData = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
-      // communityId : user.communityId,
+      communityId: user.communityId,
       community: community || null, // null if no community found
       tenureId: user.tenureId,
       teamLeadId: user.teamLeadId || null,
@@ -357,11 +356,14 @@ const getLeadsByTenure = async (req, res) => {
     }
 
     // Find users with role = teamLead and matching tenureId
-    const leads = await User.find({ role: "teamLead", tenureId })
-      .select("name email communityId tenureId");
+    const leads = await User.find({ role: "teamLead", tenureId }).select(
+      "name email communityId tenureId"
+    );
 
     if (!leads || leads.length === 0) {
-      return res.status(404).json({ message: "No team leads found for this tenure" });
+      return res
+        .status(404)
+        .json({ message: "No team leads found for this tenure" });
     }
 
     res.status(200).json({ message: "Team leads fetched successfully", leads });
@@ -370,7 +372,6 @@ const getLeadsByTenure = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
-
 
 // Get all events for a given tenureId
 const getEventsByTenure = async (req, res) => {
@@ -424,7 +425,6 @@ const createTeam = async (req, res) => {
   }
 };
 
-
 // Get teams by tenureId
 const getTeamsByTenure = async (req, res) => {
   try {
@@ -453,18 +453,10 @@ const getTeamsByTenure = async (req, res) => {
   }
 };
 
-
-
 // 1️⃣ Create Task
 const createTask = async (req, res) => {
   try {
-    const {
-      tenureId,
-      eventId,
-      title,
-      description,
-    
-    } = req.body;
+    const { tenureId, eventId, title, description } = req.body;
 
     // Basic validation
     if (!eventId || !title) {
@@ -481,7 +473,9 @@ const createTask = async (req, res) => {
     });
 
     const savedTask = await task.save();
-    res.status(201).json({ message: "Task created successfully", task: savedTask });
+    res
+      .status(201)
+      .json({ message: "Task created successfully", task: savedTask });
   } catch (error) {
     console.error("Error creating task:", error);
     res.status(500).json({ message: "Server error", error: error.message });
@@ -517,7 +511,6 @@ const getTasksByEventAndTeam = async (req, res) => {
   }
 };
 
-
 module.exports = {
   login,
   createCommunity,
@@ -534,5 +527,5 @@ module.exports = {
   createTeam,
   getTeamsByTenure,
   getLeadsByTenure,
-  createTask
+  createTask,
 };
