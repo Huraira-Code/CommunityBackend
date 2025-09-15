@@ -13,6 +13,7 @@ const {
   getTenureByID,
   createEvent,
   getEventsByTenure,
+  createTask,
 } = require("../controllers/controller");
 
 const authenticationMiddleware = require("../middleware/authentication");
@@ -41,6 +42,7 @@ router.post(
   getUserData
 );
 
+router.post("/createTask", createTask);
 
 // Tenures by community (any authenticated role)
 router.get("/communities/:communityId/tenures", getTenuresByCommunity);

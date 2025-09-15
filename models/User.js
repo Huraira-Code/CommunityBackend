@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
   },
   communityId: { type: mongoose.Schema.Types.ObjectId, ref: 'Community' }, // supervisor and below
   tenureId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tenure' }, // president and below
-  teamLeadId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // member only
+  teamId: { type: mongoose.Schema.Types.ObjectId, ref: 'Team' }, // member only
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

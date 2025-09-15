@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const Community = require("../models/Community");
 const Tenure = require("../models/Tenure");
 const Event = require("../models/Event");
-
+const Team = require("../models/Team");
 // POST /api/auth/login
 const login = async (req, res) => {
   try {
@@ -81,13 +81,11 @@ const createCommunity = async (req, res) => {
     });
     await community.save();
 
-    res
-      .status(201)
-      .json({
-        message: "Community and Supervisor created",
-        community,
-        supervisor,
-      });
+    res.status(201).json({
+      message: "Community and Supervisor created",
+      community,
+      supervisor,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
@@ -275,7 +273,7 @@ const getTenuresByCommunity = async (req, res) => {
 
 const createMember = async (req, res) => {
   try {
-    const { name, email, password, teamLeadId, tenureId } = req.body;
+    const { name, email, password, teamId, tenureId } = req.body;
 
     if (!name || !email || !password || !teamLeadId || !tenureId) {
       return res.status(400).json({ message: "Required fields missing" });
@@ -286,7 +284,7 @@ const createMember = async (req, res) => {
       email,
       password,
       role: "member",
-      teamLeadId,
+      teamId,
       tenureId,
     });
     await member.save();
@@ -319,15 +317,15 @@ const getTenureByID = async (req, res) => {
   }
 };
 
-
-
 // Create a new event
 const createEvent = async (req, res) => {
   try {
     const { tenureId, name, description, date, createdBy } = req.body;
 
     if (!tenureId || !name || !date) {
-      return res.status(400).json({ error: 'tenureId, name, and date are required.' });
+      return res
+        .status(400)
+        .json({ error: "tenureId, name, and date are required." });
     }
 
     const event = new Event({
@@ -335,17 +333,42 @@ const createEvent = async (req, res) => {
       name,
       description,
       date,
-      createdBy
+      createdBy,
     });
 
     await event.save();
 
-    res.status(201).json({ message: 'Event created successfully.', event });
+    res.status(201).json({ message: "Event created successfully.", event });
   } catch (err) {
-    console.error('Error creating event:', err);
-    res.status(500).json({ error: 'Internal server error.' });
+    console.error("Error creating event:", err);
+    res.status(500).json({ error: "Internal server error." });
   }
 };
+
+// controllers/teamController.js
+const getLeadsByTenure = async (req, res) => {
+  try {
+    const { tenureId } = req.params;
+
+    if (!tenureId) {
+      return res.status(400).json({ message: "tenureId is required" });
+    }
+
+    // Find users with role = teamLead and matching tenureId
+    const leads = await User.find({ role: "teamLead", tenureId })
+      .select("name email communityId tenureId");
+
+    if (!leads || leads.length === 0) {
+      return res.status(404).json({ message: "No team leads found for this tenure" });
+    }
+
+    res.status(200).json({ message: "Team leads fetched successfully", leads });
+  } catch (error) {
+    console.error("Error fetching team leads by tenure:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
 
 // Get all events for a given tenureId
 const getEventsByTenure = async (req, res) => {
@@ -356,11 +379,141 @@ const getEventsByTenure = async (req, res) => {
 
     res.status(200).json({ events });
   } catch (err) {
-    console.error('Error fetching events:', err);
-    res.status(500).json({ error: 'Internal server error.' });
+    console.error("Error fetching events:", err);
+    res.status(500).json({ error: "Internal server error." });
   }
 };
 
+const createTeam = async (req, res) => {
+  try {
+    const { name, leadId, communityId, tenureId } = req.body;
+
+    // Basic validation
+    if (!name || !leadId || !communityId || !tenureId) {
+      return res.status(400).json({
+        message: "name, leadId, communityId, and tenureId are required",
+      });
+    }
+
+    // Create the team
+    const team = new Team({
+      name,
+      leadId,
+      communityId,
+      tenureId,
+    });
+
+    const savedTeam = await team.save();
+
+    // Update the lead user to include this teamId
+    await User.findByIdAndUpdate(
+      leadId,
+      { $set: { teamId: savedTeam._id } }, // Assuming you add a teamId field in User schema
+      { new: true }
+    );
+
+    res.status(201).json({
+      message: "Team created successfully and lead updated",
+      team: savedTeam,
+    });
+  } catch (error) {
+    console.error("Error creating team:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+
+// Get teams by tenureId
+const getTeamsByTenure = async (req, res) => {
+  try {
+    const { tenureId } = req.params;
+
+    if (!tenureId) {
+      return res.status(400).json({ message: "tenureId is required" });
+    }
+
+    const teams = await Team.find({ tenureId })
+      .populate("leadId", "name email") // populate lead
+      .populate("members", "name email") // populate members
+      .populate("communityId", "name") // populate community
+      .populate("tenureId", "name "); // populate tenure
+
+    if (!teams || teams.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No teams found for this tenure" });
+    }
+
+    res.status(200).json({ message: "Teams fetched successfully", teams });
+  } catch (error) {
+    console.error("Error fetching teams by tenure:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+
+
+// 1️⃣ Create Task
+const createTask = async (req, res) => {
+  try {
+    const {
+      tenureId,
+      eventId,
+      title,
+      description,
+    
+    } = req.body;
+
+    // Basic validation
+    if (!eventId || !title) {
+      return res.status(400).json({
+        message: "teamId, tenureId, eventId, and title are required",
+      });
+    }
+
+    const task = new Task({
+      tenureId,
+      eventId,
+      title,
+      description,
+    });
+
+    const savedTask = await task.save();
+    res.status(201).json({ message: "Task created successfully", task: savedTask });
+  } catch (error) {
+    console.error("Error creating task:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+const getTasksByEventAndTeam = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const { teamId } = req.query; // optional query parameter
+
+    if (!eventId) {
+      return res.status(400).json({ message: "eventId is required" });
+    }
+
+    // Build query
+    const query = { eventId };
+    if (teamId) query.teamId = teamId;
+
+    const tasks = await Task.find(query)
+      .populate("teamId", "name")
+      .populate("assignedToTeamLead", "name email")
+      .populate("assignedToMember", "name email");
+
+    if (!tasks || tasks.length === 0) {
+      return res.status(404).json({ message: "No tasks found for this event" });
+    }
+
+    res.status(200).json({ message: "Tasks fetched successfully", tasks });
+  } catch (error) {
+    console.error("Error fetching tasks by event:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
 
 
 module.exports = {
@@ -375,5 +528,9 @@ module.exports = {
   getUserData,
   getTenureByID,
   createEvent,
-  getEventsByTenure
+  getEventsByTenure,
+  createTeam,
+  getTeamsByTenure,
+  getLeadsByTenure,
+  createTask
 };
