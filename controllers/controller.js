@@ -114,7 +114,7 @@ const createTenure = async (req, res) => {
 };
 const createPresident = async (req, res) => {
   try {
-    const { name, email, password, tenureId } = req.body;
+    const { name, email, password, tenureId, communityId } = req.body;
 
     // Validate required fields
     if (!name || !email || !password || !tenureId) {
@@ -134,6 +134,7 @@ const createPresident = async (req, res) => {
       password, // ✅ no bcrypt used currently
       role: "president",
       tenureId,
+      communityId
     });
 
     await president.save();
