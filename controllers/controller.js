@@ -152,7 +152,7 @@ const createPresident = async (req, res) => {
 
 const createTeamLead = async (req, res) => {
   try {
-    const { name, email, password, tenureId } = req.body;
+    const { name, email, password, tenureId , communityId } = req.body;
 
     if (!name || !email || !password || !tenureId) {
       return res.status(400).json({ message: "Required fields missing" });
@@ -164,6 +164,7 @@ const createTeamLead = async (req, res) => {
       password,
       role: "teamLead",
       tenureId,
+      communityId
     });
     await teamLead.save();
 
