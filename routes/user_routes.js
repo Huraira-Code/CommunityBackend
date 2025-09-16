@@ -18,6 +18,7 @@ const {
   getTeamsByTenure,
   getLeadsByTenure,
   getTasksByEventAndTeam,
+  getMembersByLead,
 } = require("../controllers/controller");
 
 const authenticationMiddleware = require("../middleware/authentication");
@@ -48,7 +49,7 @@ router.get("/communities/:tenureId/tenuresById", getTenureByID);
 
 // Events
 router.post("/createEvent", createEvent);
-router.get("/tenures/:tenureId/events", getEventsByTenure);
+router.get("/members/lead/:leadId", getMembersByLead);
 
 // Teams
 router.post("/createTeam", createTeam);

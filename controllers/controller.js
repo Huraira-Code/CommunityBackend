@@ -275,23 +275,59 @@ const getTenuresByCommunity = async (req, res) => {
 
 const createMember = async (req, res) => {
   try {
-    const { name, email, password, teamId, tenureId } = req.body;
+    const { name, email, password, leadId, tenureId } = req.body;
 
-    if (!name || !email || !password || !teamLeadId || !tenureId) {
+    // Validate required fields
+    if (!name || !email || !password || !leadId || !tenureId) {
       return res.status(400).json({ message: "Required fields missing" });
     }
 
+    // Find the team by leadId
+    const team = await Team.findOne({ leadId, tenureId });
+    if (!team) {
+      return res.status(404).json({ message: "Team with this lead not found" });
+    }
+
+    // Create member and assign to team
     const member = new User({
       name,
       email,
       password,
       role: "member",
-      teamId,
+      teamId: team._id,
       tenureId,
     });
+
     await member.save();
 
+    // Add member to team's members array
+    team.members.push(member._id);
+    await team.save();
+
     res.status(201).json({ message: "Member created", member });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+const getMembersByLead = async (req, res) => {
+  try {
+    const { leadId } = req.params;
+
+    if (!leadId) {
+      return res.status(400).json({ message: "leadId is required" });
+    }
+
+    // Fetch all members where leadId matches
+    const members = await User.find({ leadId, role: "member" }).select("name email teamId");
+
+    if (!members.length) {
+      return res.status(404).json({ message: "No members found for this lead" });
+    }
+
+    res.status(200).json({ members });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
@@ -529,5 +565,6 @@ module.exports = {
   getTeamsByTenure,
   getLeadsByTenure,
   createTask,
-  getTasksByEventAndTeam
+  getTasksByEventAndTeam,
+  getMembersByLead
 };
