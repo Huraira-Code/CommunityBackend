@@ -13,42 +13,61 @@ const {
   getTenureByID,
   createEvent,
   getEventsByTenure,
+  createTeam,
+  getTeamsByTenure,
+  getLeadsByTenure,
   createTask,
+  getTasksByEventAndTeam,
 } = require("../controllers/controller");
 
 const authenticationMiddleware = require("../middleware/authentication");
 
-// Public route
-router.post("/login", login);
+/**
+ * 🔑 Auth
+ */
+router.post("/auth/login", login);
 
-// Protected + Role-based routes
-router.post("/createCommunity", createCommunity);
+/**
+ * 🏢 Communities
+ */
+router.post("/communities",  createCommunity);
+router.get("/communities",  getAllCommunities);
 
-router.post("/createPresident", createPresident);
+// Tenures by community
+router.get("/communities/:communityId/tenures",  getTenuresByCommunity);
 
-router.post("/createTeamLead", createTeamLead);
+/**
+ * 👥 Users / Roles
+ */
+router.get("/me",  getUserData);
 
-router.post("/createMember", createMember);
+router.post("/presidents",  createPresident);
+router.post("/teamLeads",  createTeamLead);
+router.post("/members",  createMember);
 
-router.post("/createTenure", createTenure);
+/**
+ * ⏳ Tenures
+ */
+router.post("/tenures",  createTenure);
+router.get("/tenures/:tenureId",  getTenureByID);
 
-// Anyone authenticated can view communities
-router.get("/getAllCommunities", getAllCommunities);
+/**
+ * 📅 Events
+ */
+router.post("/tenures/:tenureId/events",  createEvent);
+router.get("/tenures/:tenureId/events",  getEventsByTenure);
 
-// Get user data (any authenticated role)
-router.post(
-  "/getUserData",
+/**
+ * 🛠️ Teams
+ */
+router.post("/teams",  createTeam);
+router.get("/tenures/:tenureId/teams",  getTeamsByTenure);
+router.get("/tenures/:tenureId/teamLeads",  getLeadsByTenure);
 
-  getUserData
-);
+/**
+ * ✅ Tasks
+ */
+router.post("/tasks",  createTask);
+router.get("/events/:eventId/tasks",  getTasksByEventAndTeam);
 
-router.post("/createTask", createTask);
-
-// Tenures by community (any authenticated role)
-router.get("/communities/:communityId/tenures", getTenuresByCommunity);
-router.get("/communities/:tenureId/tenuresById", getTenureByID);
-
-router.post("/createEvent", createEvent);
-// Get events by tenure ID
-router.get("/tenures/:tenureId/events", getEventsByTenure);
 module.exports = router;

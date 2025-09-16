@@ -528,4 +528,5 @@ module.exports = {
   getTeamsByTenure,
   getLeadsByTenure,
   createTask,
+  getTasksByEventAndTeam
 };
