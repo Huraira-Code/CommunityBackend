@@ -293,6 +293,7 @@ const createMember = async (req, res) => {
       name,
       email,
       password,
+      leadId,
       role: "member",
       teamId: team._id,
       tenureId,
