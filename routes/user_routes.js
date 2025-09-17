@@ -55,5 +55,6 @@ router.get("/members/lead/:leadId", getMembersByLead);
 router.post("/createTeam", createTeam);
 router.get("/tenures/:tenureId/teams", getTeamsByTenure);
 router.get("/tenures/:tenureId/teamLeads", getLeadsByTenure);
+router.get("/tenures/:tenureId/events", getEventsByTenure);
 
 module.exports = router;
