@@ -313,6 +313,57 @@ const createMember = async (req, res) => {
 };
 
 
+const editCommunity = async (req, res) => {
+  try {
+    const { communityId } = req.params;
+    const { communityName, supervisorName, supervisorEmail, supervisorPassword } = req.body;
+
+    if (!communityId) {
+      return res.status(400).json({ message: "Community ID is required" });
+    }
+
+    // Find the community
+    const community = await Community.findById(communityId);
+    if (!community) {
+      return res.status(404).json({ message: "Community not found" });
+    }
+
+    // Update community name if provided
+    if (communityName) {
+      community.name = communityName;
+    }
+
+    // If supervisor details are being updated
+    if (supervisorName || supervisorEmail || supervisorPassword) {
+      if (!community.supervisorId) {
+        return res.status(400).json({ message: "This community has no supervisor assigned" });
+      }
+
+      const supervisor = await User.findById(community.supervisorId);
+      if (!supervisor) {
+        return res.status(404).json({ message: "Supervisor not found" });
+      }
+
+      if (supervisorName) supervisor.name = supervisorName;
+      if (supervisorEmail) supervisor.email = supervisorEmail;
+      if (supervisorPassword) supervisor.password = supervisorPassword; // 🔑 no bcrypt yet
+
+      await supervisor.save();
+    }
+
+    await community.save();
+
+    res.status(200).json({
+      message: "Community updated successfully",
+      community,
+    });
+  } catch (err) {
+    console.error("Error editing community:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+
 const getMembersByLead = async (req, res) => {
   try {
     const { leadId } = req.params;
@@ -603,5 +654,6 @@ module.exports = {
   createTask,
   getTasksByEventAndTeam,
   getMembersByLead,
-  deleteCommunity
+  deleteCommunity,
+  editCommunity
 };
