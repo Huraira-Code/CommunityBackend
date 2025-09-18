@@ -356,6 +356,41 @@ const getTenureByID = async (req, res) => {
   }
 };
 
+
+const deleteCommunity = async (req, res) => {
+  try {
+    const { communityId } = req.params;
+
+    if (!communityId) {
+      return res.status(400).json({ message: "Community ID is required" });
+    }
+
+    // Check if community exists
+    const community = await Community.findById(communityId);
+    if (!community) {
+      return res.status(404).json({ message: "Community not found" });
+    }
+
+    // (Optional) Delete related tenures
+    await Tenure.deleteMany({ communityId });
+
+    // (Optional) Delete related teams
+    await Team.deleteMany({ communityId });
+
+    // (Optional) Delete supervisor user
+    if (community.supervisorId) {
+      await User.findByIdAndDelete(community.supervisorId);
+    }
+
+    // Finally, delete community itself
+    await Community.findByIdAndDelete(communityId);
+
+    res.status(200).json({ message: "Community and related data deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting community:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
 // Create a new event
 const createEvent = async (req, res) => {
   try {
@@ -567,5 +602,6 @@ module.exports = {
   getLeadsByTenure,
   createTask,
   getTasksByEventAndTeam,
-  getMembersByLead
+  getMembersByLead,
+  deleteCommunity
 };

@@ -19,6 +19,7 @@ const {
   getLeadsByTenure,
   getTasksByEventAndTeam,
   getMembersByLead,
+  deleteCommunity,
 } = require("../controllers/controller");
 
 const authenticationMiddleware = require("../middleware/authentication");
@@ -56,5 +57,6 @@ router.post("/createTeam", createTeam);
 router.get("/tenures/:tenureId/teams", getTeamsByTenure);
 router.get("/tenures/:tenureId/teamLeads", getLeadsByTenure);
 router.get("/tenures/:tenureId/events", getEventsByTenure);
+router.delete("/communities/:communityId", deleteCommunity);
 
 module.exports = router;
