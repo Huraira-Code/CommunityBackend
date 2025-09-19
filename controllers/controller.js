@@ -275,10 +275,10 @@ const getTenuresByCommunity = async (req, res) => {
 
 const createMember = async (req, res) => {
   try {
-    const { name, email, password, leadId, tenureId } = req.body;
+    const { name, email, password, leadId, tenureId ,communityId} = req.body;
 
     // Validate required fields
-    if (!name || !email || !password || !leadId || !tenureId) {
+    if (!name || !email || !password || !leadId || !tenureId , communityId) {
       return res.status(400).json({ message: "Required fields missing" });
     }
 
@@ -297,6 +297,7 @@ const createMember = async (req, res) => {
       role: "member",
       teamId: team._id,
       tenureId,
+      communityId
     });
 
     await member.save();
