@@ -152,7 +152,7 @@ const createPresident = async (req, res) => {
 
 const createTeamLead = async (req, res) => {
   try {
-    const { name, email, password, tenureId , communityId } = req.body;
+    const { name, email, password, tenureId, communityId } = req.body;
 
     if (!name || !email || !password || !tenureId) {
       return res.status(400).json({ message: "Required fields missing" });
@@ -164,7 +164,7 @@ const createTeamLead = async (req, res) => {
       password,
       role: "teamLead",
       tenureId,
-      communityId
+      communityId,
     });
     await teamLead.save();
 
@@ -312,11 +312,15 @@ const createMember = async (req, res) => {
   }
 };
 
-
 const editCommunity = async (req, res) => {
   try {
     const { communityId } = req.params;
-    const { communityName, supervisorName, supervisorEmail, supervisorPassword } = req.body;
+    const {
+      communityName,
+      supervisorName,
+      supervisorEmail,
+      supervisorPassword,
+    } = req.body;
 
     if (!communityId) {
       return res.status(400).json({ message: "Community ID is required" });
@@ -336,7 +340,9 @@ const editCommunity = async (req, res) => {
     // If supervisor details are being updated
     if (supervisorName || supervisorEmail || supervisorPassword) {
       if (!community.supervisorId) {
-        return res.status(400).json({ message: "This community has no supervisor assigned" });
+        return res
+          .status(400)
+          .json({ message: "This community has no supervisor assigned" });
       }
 
       const supervisor = await User.findById(community.supervisorId);
@@ -363,7 +369,6 @@ const editCommunity = async (req, res) => {
   }
 };
 
-
 const getMembersByLead = async (req, res) => {
   try {
     const { leadId } = req.params;
@@ -373,10 +378,14 @@ const getMembersByLead = async (req, res) => {
     }
 
     // Fetch all members where leadId matches
-    const members = await User.find({ leadId, role: "member" }).select("name email teamId");
+    const members = await User.find({ leadId, role: "member" }).select(
+      "name email teamId"
+    );
 
     if (!members.length) {
-      return res.status(404).json({ message: "No members found for this lead" });
+      return res
+        .status(404)
+        .json({ message: "No members found for this lead" });
     }
 
     res.status(200).json({ members });
@@ -407,7 +416,6 @@ const getTenureByID = async (req, res) => {
   }
 };
 
-
 const deleteCommunity = async (req, res) => {
   try {
     const { communityId } = req.params;
@@ -436,7 +444,9 @@ const deleteCommunity = async (req, res) => {
     // Finally, delete community itself
     await Community.findByIdAndDelete(communityId);
 
-    res.status(200).json({ message: "Community and related data deleted successfully" });
+    res
+      .status(200)
+      .json({ message: "Community and related data deleted successfully" });
   } catch (error) {
     console.error("Error deleting community:", error);
     res.status(500).json({ message: "Server error", error: error.message });
@@ -565,9 +575,7 @@ const getTeamsByTenure = async (req, res) => {
       .populate("tenureId", "name "); // populate tenure
 
     if (!teams || teams.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No teams found for this tenure" });
+      res.status(200).json({ message: "No Team Found ", teams: [] });
     }
 
     res.status(200).json({ message: "Teams fetched successfully", teams });
@@ -655,5 +663,5 @@ module.exports = {
   getTasksByEventAndTeam,
   getMembersByLead,
   deleteCommunity,
-  editCommunity
+  editCommunity,
 };
