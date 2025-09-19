@@ -278,7 +278,7 @@ const createMember = async (req, res) => {
     const { name, email, password, leadId, tenureId ,communityId} = req.body;
 
     // Validate required fields
-    if (!name || !email || !password || !leadId || !tenureId , communityId) {
+    if (!name || !email || !password || !leadId || !tenureId || !communityId) {
       return res.status(400).json({ message: "Required fields missing" });
     }
 
