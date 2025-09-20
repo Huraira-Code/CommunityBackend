@@ -704,41 +704,36 @@ const assignTaskToMember = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
-
 const getTasks = async (req, res) => {
   try {
-    const userId = req.body.userId; // from JWT
-    const role = req.body.role; // from JWT
+    const { userId, role, eventId } = req.query; 
+    // Or use req.params.eventId if you prefer /events/:eventId/tasks
 
-    let query = {};
+    if (!userId || !role || !eventId) {
+      return res.status(400).json({ message: "userId, role and eventId are required" });
+    }
+
+    let query = { eventId }; // Always filter by event
 
     switch (role) {
       case "supervisor":
-        // Supervisor sees only tasks they created
-        query = { createdBySupervisor: userId };
+        query.createdBySupervisor = userId;
         break;
 
       case "president":
-        // President sees tasks they assigned to leads,
-        // but those tasks must have been created by a supervisor
-        query = {
-          assignedByPresident: userId,
-          createdBySupervisor: { $exists: true },
-        };
+        query.assignedByPresident = userId;
+        query.createdBySupervisor = { $exists: true };
         break;
 
       case "teamLead":
-        // Team Lead sees:
-        // 1. Tasks assigned to them by president
-        // 2. Tasks they assigned to members
-        query = {
-          $or: [{ assignedToTeamLead: userId }, { assignedByTeamLead: userId }],
-        };
+        query.$or = [
+          { assignedToTeamLead: userId, eventId },
+          { assignedByTeamLead: userId, eventId },
+        ];
         break;
 
       case "member":
-        // Member sees only tasks assigned to them
-        query = { assignedToMember: userId };
+        query.assignedToMember = userId;
         break;
 
       default:
@@ -746,6 +741,7 @@ const getTasks = async (req, res) => {
     }
 
     const tasks = await Task.find(query)
+      .populate("eventId", "name date")
       .populate("createdBySupervisor", "name email role")
       .populate("assignedByPresident", "name email role")
       .populate("assignedToTeamLead", "name email role")
