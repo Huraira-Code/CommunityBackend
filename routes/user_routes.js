@@ -64,7 +64,7 @@ router.get("/tenures/:tenureId/events", getEventsByTenure);
 router.delete("/communities/:communityId", deleteCommunity);
 router.put("/communities/:communityId", editCommunity);
 router.post("/tasks", createTask);  // Supervisor creates a task
-router.post("/tasks", getTasks);     // Role-based task fetching
+router.post("/gettasks", getTasks);     // Role-based task fetching
 
 // Assignments
 router.post("/tasks/:taskId/assign/lead/:leadId", assignTaskToLead);       // President → Team Lead
