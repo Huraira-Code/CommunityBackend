@@ -262,7 +262,7 @@ const getTenuresByCommunity = async (req, res) => {
 
     if (!tenures || tenures.length === 0) {
       return res
-        .status(404)
+        .status(200)
         .json({ message: "No tenures found for this community" });
     }
 
