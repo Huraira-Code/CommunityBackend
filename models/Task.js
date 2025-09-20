@@ -1,41 +1,24 @@
 const mongoose = require("mongoose");
 
-const taskSchema = new mongoose.Schema(
+const TaskSchema = new mongoose.Schema(
   {
-    teamId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Team",
-      required: true,
-    },
-    tenureId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Tenure",
-      required: true,
-    },
-    eventId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Event",
-      required: true,
-    },
-
     title: { type: String, required: true },
     description: { type: String },
+    tenureId: { type: mongoose.Schema.Types.ObjectId, ref: "Tenure", required: true },
+    eventId: { type: mongoose.Schema.Types.ObjectId, ref: "Event" },
 
-    // Separate assignment
-    assignedToTeamLead: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    assignedToMember: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    // Who created the task (always supervisor)
+    createdBySupervisor: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
 
-    // Separate marks
-    teamLeadMarks: { type: Number, default: 0 },
-    memberMarks: { type: Number, default: 0 },
+    // Assigned hierarchy
+    assignedByPresident: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // optional until president assigns
+    assignedToTeamLead: { type: mongoose.Schema.Types.ObjectId, ref: "User" },  // team lead
+    assignedByTeamLead: { type: mongoose.Schema.Types.ObjectId, ref: "User" },  // which team lead assigned to member
+    assignedToMember: { type: mongoose.Schema.Types.ObjectId, ref: "User" },    // final member
 
-    status: {
-      type: String,
-      enum: ["TeamLead", "TeamMember", "Completed"],
-      default: "TeamLead",
-    },
+    status: { type: String, enum: ["pending", "in-progress", "completed"], default: "pending" },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Task", taskSchema);
+module.exports = mongoose.model("Task", TaskSchema);

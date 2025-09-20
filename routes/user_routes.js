@@ -21,6 +21,9 @@ const {
   getMembersByLead,
   deleteCommunity,
   editCommunity,
+  getTasks,
+  assignTaskToLead,
+  assignTaskToMember,
 } = require("../controllers/controller");
 
 const authenticationMiddleware = require("../middleware/authentication");
@@ -60,5 +63,12 @@ router.get("/tenures/:tenureId/teamLeads", getLeadsByTenure);
 router.get("/tenures/:tenureId/events", getEventsByTenure);
 router.delete("/communities/:communityId", deleteCommunity);
 router.put("/communities/:communityId", editCommunity);
+router.post("/tasks", createTask);  // Supervisor creates a task
+router.post("/tasks", getTasks);     // Role-based task fetching
+
+// Assignments
+router.post("/tasks/:taskId/assign/lead/:leadId", assignTaskToLead);       // President → Team Lead
+router.post("/tasks/:taskId/assign/member/:memberId", assignTaskToMember); // Team Lead → Member
+
 
 module.exports = router;

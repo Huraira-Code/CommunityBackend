@@ -275,7 +275,7 @@ const getTenuresByCommunity = async (req, res) => {
 
 const createMember = async (req, res) => {
   try {
-    const { name, email, password, leadId, tenureId ,communityId} = req.body;
+    const { name, email, password, leadId, tenureId, communityId } = req.body;
 
     // Validate required fields
     if (!name || !email || !password || !leadId || !tenureId || !communityId) {
@@ -297,7 +297,7 @@ const createMember = async (req, res) => {
       role: "member",
       teamId: team._id,
       tenureId,
-      communityId
+      communityId,
     });
 
     await member.save();
@@ -587,33 +587,6 @@ const getTeamsByTenure = async (req, res) => {
 };
 
 // 1️⃣ Create Task
-const createTask = async (req, res) => {
-  try {
-    const { tenureId, eventId, title, description } = req.body;
-
-    // Basic validation
-    if (!eventId || !title) {
-      return res.status(400).json({
-        message: "teamId, tenureId, eventId, and title are required",
-      });
-    }
-
-    const task = new Task({
-      tenureId,
-      eventId,
-      title,
-      description,
-    });
-
-    const savedTask = await task.save();
-    res
-      .status(201)
-      .json({ message: "Task created successfully", task: savedTask });
-  } catch (error) {
-    console.error("Error creating task:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
-  }
-};
 
 const getTasksByEventAndTeam = async (req, res) => {
   try {
@@ -643,6 +616,149 @@ const getTasksByEventAndTeam = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+// 1️⃣ Supervisor creates task
+const createTask = async (req, res) => {
+  try {
+    const { tenureId, eventId, title, description } = req.body;
+    const supervisorId = req.body.supervisorId; // ✅ extracted from JWT
+
+    if (!tenureId || !title) {
+      return res
+        .status(400)
+        .json({ message: "tenureId and title are required" });
+    }
+
+    const task = new Task({
+      tenureId,
+      eventId,
+      title,
+      description,
+      createdBySupervisor: supervisorId,
+    });
+
+    await task.save();
+    res
+      .status(201)
+      .json({ message: "Task created successfully by Supervisor", task });
+  } catch (error) {
+    console.error("Error creating task:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// 2️⃣ President assigns task to Team Lead
+const assignTaskToLead = async (req, res) => {
+  try {
+    const { taskId, teamLeadId } = req.body;
+    const presidentId = req.user.userId;
+
+    if (!taskId || !teamLeadId) {
+      return res
+        .status(400)
+        .json({ message: "taskId and teamLeadId are required" });
+    }
+
+    const task = await Task.findById(taskId);
+    if (!task) return res.status(404).json({ message: "Task not found" });
+
+    task.assignedByPresident = presidentId;
+    task.assignedToTeamLead = teamLeadId;
+
+    await task.save();
+    res.status(200).json({ message: "Task assigned to Team Lead", task });
+  } catch (error) {
+    console.error("Error assigning task to team lead:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// 3️⃣ Team Lead assigns task to Member
+const assignTaskToMember = async (req, res) => {
+  try {
+    const { taskId, memberId } = req.body;
+    const teamLeadId = req.user.userId;
+
+    if (!taskId || !memberId) {
+      return res
+        .status(400)
+        .json({ message: "taskId and memberId are required" });
+    }
+
+    const task = await Task.findById(taskId);
+    if (!task) return res.status(404).json({ message: "Task not found" });
+
+    // Ensure the logged-in lead is the one assigned this task
+    if (String(task.assignedToTeamLead) !== String(teamLeadId)) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to assign this task" });
+    }
+
+    task.assignedByTeamLead = teamLeadId;
+    task.assignedToMember = memberId;
+
+    await task.save();
+    res.status(200).json({ message: "Task assigned to Member", task });
+  } catch (error) {
+    console.error("Error assigning task to member:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+const getTasks = async (req, res) => {
+  try {
+    const userId = req.body.userId; // from JWT
+    const role = req.body.role; // from JWT
+
+    let query = {};
+
+    switch (role) {
+      case "supervisor":
+        // Supervisor sees only tasks they created
+        query = { createdBySupervisor: userId };
+        break;
+
+      case "president":
+        // President sees tasks they assigned to leads,
+        // but those tasks must have been created by a supervisor
+        query = {
+          assignedByPresident: userId,
+          createdBySupervisor: { $exists: true },
+        };
+        break;
+
+      case "teamLead":
+        // Team Lead sees:
+        // 1. Tasks assigned to them by president
+        // 2. Tasks they assigned to members
+        query = {
+          $or: [{ assignedToTeamLead: userId }, { assignedByTeamLead: userId }],
+        };
+        break;
+
+      case "member":
+        // Member sees only tasks assigned to them
+        query = { assignedToMember: userId };
+        break;
+
+      default:
+        return res.status(403).json({ message: "Unauthorized role" });
+    }
+
+    const tasks = await Task.find(query)
+      .populate("createdBySupervisor", "name email role")
+      .populate("assignedByPresident", "name email role")
+      .populate("assignedToTeamLead", "name email role")
+      .populate("assignedByTeamLead", "name email role")
+      .populate("assignedToMember", "name email role")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({ tasks });
+  } catch (error) {
+    console.error("Error fetching tasks:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
 
 module.exports = {
   login,
@@ -663,6 +779,9 @@ module.exports = {
   createTask,
   getTasksByEventAndTeam,
   getMembersByLead,
+  assignTaskToLead,
+  assignTaskToMember,
+  getTasks,
   deleteCommunity,
   editCommunity,
 };
