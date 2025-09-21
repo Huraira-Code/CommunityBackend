@@ -724,7 +724,6 @@ const getTasks = async (req, res) => {
         break;
 
       case "president":
-        query.assignedByPresident = userId;
         query.createdBySupervisor = { $exists: true };
         break;
 
@@ -783,6 +782,41 @@ const deleteTask = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
+
+// ✏️ Edit Task
+const editTask = async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const updates = req.body; // contains fields to update (title, description, deadline, status, etc.)
+
+    if (!taskId) {
+      return res.status(400).json({ message: "taskId is required" });
+    }
+
+    // Find task
+    const task = await Task.findById(taskId);
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    // Update task with only provided fields
+    Object.keys(updates).forEach((key) => {
+      task[key] = updates[key];
+    });
+
+    await task.save();
+
+    res.status(200).json({
+      message: "Task updated successfully",
+      task,
+    });
+  } catch (error) {
+    console.error("Error editing task:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
 
 
 module.exports = {
