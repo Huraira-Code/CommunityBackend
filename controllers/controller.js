@@ -708,11 +708,12 @@ const assignTaskToMember = async (req, res) => {
 };
 const getTasks = async (req, res) => {
   try {
-    const { userId, role, eventId } = req.query; 
+    const { userId, role, eventId } = req.body; 
     // Or use req.params.eventId if you prefer /events/:eventId/tasks
 
     if (!userId || !role || !eventId) {
-      return res.status(400).json({ message: "userId, role and eventId are required" });
+
+      return res.status(200).json({ message: "userId, role and eventId are required" , response : { userId,role,eventId} });
     }
 
     let query = { eventId }; // Always filter by event
