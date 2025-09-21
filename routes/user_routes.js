@@ -24,6 +24,7 @@ const {
   getTasks,
   assignTaskToLead,
   assignTaskToMember,
+  deleteTask,
 } = require("../controllers/controller");
 
 const authenticationMiddleware = require("../middleware/authentication");
@@ -65,6 +66,7 @@ router.delete("/communities/:communityId", deleteCommunity);
 router.put("/communities/:communityId", editCommunity);
 router.post("/tasks", createTask);  // Supervisor creates a task
 router.post("/gettasks", getTasks);     // Role-based task fetching
+router.delete("/tasks/:taskId", deleteTask);
 
 // Assignments
 router.post("/tasks/:taskId/assign/lead/:leadId", assignTaskToLead);       // President → Team Lead
