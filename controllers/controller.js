@@ -651,8 +651,7 @@ const createTask = async (req, res) => {
 // 2️⃣ President assigns task to Team Lead
 const assignTaskToLead = async (req, res) => {
   try {
-    const { taskId, teamLeadId } = req.body;
-    const presidentId = req.user.userId;
+    const { taskId, teamLeadId, presidentId } = req.body;
 
     if (!taskId || !teamLeadId) {
       return res
