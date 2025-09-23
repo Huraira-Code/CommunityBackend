@@ -70,7 +70,7 @@ router.delete("/tasks/:taskId", deleteTask);
 
 // Assignments
 router.post("/assigntasktoTeamLead", assignTaskToLead);       // President → Team Lead
-router.post("/tasks/:taskId/assign/member/:memberId", assignTaskToMember); // Team Lead → Member
+router.post("/assignTaskToMember", assignTaskToMember); // Team Lead → Member
 
 
 module.exports = router;

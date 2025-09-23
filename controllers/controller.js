@@ -676,8 +676,7 @@ const assignTaskToLead = async (req, res) => {
 // 3️⃣ Team Lead assigns task to Member
 const assignTaskToMember = async (req, res) => {
   try {
-    const { taskId, memberId } = req.body;
-    const teamLeadId = req.user.userId;
+    const { taskId, memberId ,teamLeadId } = req.body;
 
     if (!taskId || !memberId) {
       return res
