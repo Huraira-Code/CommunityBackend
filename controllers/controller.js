@@ -385,12 +385,6 @@ const getMembersByLead = async (req, res) => {
       "name email teamId"
     );
 
-    if (!members.length) {
-      return res
-        .status(404)
-        .json({ message: "No members found for this lead" });
-    }
-
     res.status(200).json({ members });
   } catch (err) {
     console.error(err);
@@ -676,7 +670,7 @@ const assignTaskToLead = async (req, res) => {
 // 3️⃣ Team Lead assigns task to Member
 const assignTaskToMember = async (req, res) => {
   try {
-    const { taskId, memberId ,teamLeadId } = req.body;
+    const { taskId, memberId, teamLeadId } = req.body;
 
     if (!taskId || !memberId) {
       return res
@@ -706,12 +700,16 @@ const assignTaskToMember = async (req, res) => {
 };
 const getTasks = async (req, res) => {
   try {
-    const { userId, role, eventId } = req.body; 
+    const { userId, role, eventId } = req.body;
     // Or use req.params.eventId if you prefer /events/:eventId/tasks
 
     if (!userId || !role || !eventId) {
-
-      return res.status(200).json({ message: "userId, role and eventId are required" , response : { userId,role,eventId} });
+      return res
+        .status(200)
+        .json({
+          message: "userId, role and eventId are required",
+          response: { userId, role, eventId },
+        });
     }
 
     let query = { eventId }; // Always filter by event
@@ -781,7 +779,6 @@ const deleteTask = async (req, res) => {
   }
 };
 
-
 // ✏️ Edit Task
 const editTask = async (req, res) => {
   try {
@@ -815,8 +812,6 @@ const editTask = async (req, res) => {
   }
 };
 
-
-
 module.exports = {
   login,
   createCommunity,
@@ -841,5 +836,5 @@ module.exports = {
   getTasks,
   deleteCommunity,
   editCommunity,
-  deleteTask
+  deleteTask,
 };
