@@ -726,7 +726,6 @@ const getTasks = async (req, res) => {
       case "teamLead":
         query.$or = [
           { assignedToTeamLead: userId, eventId },
-          { assignedByTeamLead: userId, eventId },
         ];
         break;
 
